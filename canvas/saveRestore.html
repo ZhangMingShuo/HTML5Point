@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>canvas save restore</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body{
+      text-align: center;
+    }
+    canvas{
+      border: 1px solid;
+      margin-top: 56px;
+    }
+  </style>
+</head>
+<body>
+  <!-- canvas默认宽高是300*150,如果在标签中直接指定宽高其实就是重置宽高,如果是样式里设置canvas的宽高其实就是将其默认的300*150的宽高进行了拉伸或缩放,内容会变形 -->
+  <canvas id="canvas" width="500" height="300"></canvas>
+
+  <script>
+    window.addEventListener('load', saveRestore, true)
+    // save和restore区别
+    // 例如先旋转30度后画一条线如果不save和restore的话下一次再旋转30度就是相对原点旋转了60度
+    // 如果save和restore里面旋转了30度后再旋转30度其实还是相对原点旋转了30度,两条线在同一位置
+    // 也就是说save和restore里面做的操作对外面不产生影响
+    function saveRestore(){
+      let canvas = document.getElementById('canvas')
+      let context = canvas.getContext('2d')
+      context.translate(100, 100) //原点移动到100,100方便看
+      context.save()
+      context.rotate( -30 / 180 * Math.PI)
+      context.moveTo(0,0)
+      context.lineTo(0,200)
+      context.strokeStyle ='red'
+      context.stroke()
+      // context.restore()
+      context.beginPath()
+      context.rotate( -30 / 180 * Math.PI)
+      context.moveTo(100, 0)
+      context.lineTo(100, 200)
+      context.strokeStyle ='black'
+      context.stroke()
+    }
+  </script>
+</body>
+</html>

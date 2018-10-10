@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>geolocation application</title>
+</head>
+<body>
+  <h1>HTML5 Geolocation Distance Tracker</h1>
+  <p id="status">HTML5 Geolocation is <strong>not</strong> supported in your browser</p>
+  <h2>Current Position</h2>
+  <table border="1">
+    <tr>
+      <td width="40" scope="col">Latitude</td>
+      <td width="114" id="latitude">?</td>
+    </tr>
+    <tr>
+      <td>Longitude</td>
+      <td id="longitude">?</td>
+    </tr>
+    <tr>
+      <td>Accuracy</td>
+      <td id="accuracy">?</td>
+    </tr>
+    <tr>
+      <td>Last Timestamp</td>
+      <td id="timestamp">?</td>
+    </tr>
+  </table>
+  <h4 id="currDist">Current distance traveled : 0.0 km</h4>
+  <h4 id="totalDist">Total distance traveled : 0.0 km</h4>
+  
+  <script>
+    window.addEventListener('load', loadDemo, true)
+
+    let totalDistance = 0.0
+    let lastLat
+    let lastLong
+
+    //角度到弧度的计算
+    function toRadians(degree) {
+      return degree * Math.PI / 180
+    }
+    
+    //提示信息
+    function updateStatus(message) {
+      document.getElementById('status').innerHTML = message
+    }
+
+    //结束提示(不管成功还是失败)
+    function endRequest() {
+      updateStatus('Done.')
+    }
+
+    function loadDemo() {
+      if(navigator.geolocation){
+        updateStatus('HTML5 Geolocation is supported in your browser.')
+        //maximumAge表示上一次取得的坐标信息的有效时间
+        //监听当前位置信息改变
+        navigator.geolocation.watchPosition(updateLocation, handleLocationError,{maximumAge: 20000, timeout: 10000})
+      }
+    }
+
+    //获取位置信息出错处理
+    function handleLocationError(error) {
+      switch(error.code){
+        case 0: 
+          updateStatus(`不包括在其他错误号中的错误${error.message}`)
+          break
+        case 1: 
+          updateStatus(`用户选择拒绝浏览器获取其位置信息${error.message}`)
+          break
+        case 2: 
+          updateStatus(`尝试获取用户位置数据但失败了${error.message}`)
+          break
+        case 3: 
+          updateStatus(`请求位置信息超时`)
+          break
+      }
+      endRequest()
+    }
+    
+    //单次请求位置信息
+    navigator.geolocation.getCurrentPosition(updateLocation, handleLocationError, {timeout: 10000})
+    updateStatus('Requesting location data...')
+    
+    //更新位置信息
+    function updateLocation(position) {
+      let latitude = position.coords.latitude
+      let longitude = position.coords.longitude
+      let accuracy = position.coords.accuracy
+      let timestamp = position.timestamp
+
+      document.getElementById('latitude').innerHTML = latitude
+      document.getElementById('longitude').innerHTML = longitude
+      document.getElementById('accuracy').innerHTML = accuracy
+      document.getElementById('timestamp').innerHTML = timestamp
+
+      //如果准确度太低就算了
+      if(accuracy >= 500){
+        updateStatus('Need more accurate values to caculate distance.')
+        return 
+      }
+      //计算距离
+      if((lastLat!==null) && (lastLong!==null)){
+        let currentDistance = distance(latitude, longitude, lastLat, lastLong)
+        document.getElementById('currDist').innerHTML = `Current distance traveled: ${currentDistance.toFixed(4)}km`
+        totalDistance += currentDistance
+        document.getElementById('totalDist').innerHTML = `Total distance traveled: ${totalDistance.toFixed(4)}km`
+      }
+      lastLat = latitude
+      lastLong = longitude
+      updateStatus('Location successfully updated.')
+      endRequest()
+    }
+
+    //根据经纬度计算地球上两点之间的距离
+    function distance(latitude1, longitude1, latitude2, longitude2) {
+      let R = 6371
+      let deltaLatitude = toRadians(latitude2-latitude1)
+      let deltaLongitude = toRadians(longitude2-longitude1)
+      latitude1 = toRadians(latitude1)
+      latitude2 = toRadians(latitude2)
+
+      let a = Math.sin(deltaLatitude/2)*Math.sin(deltaLatitude/2)+Math.cos(latitude1)*Math.cos(latitude2)*Math.sin(deltaLatitude/2)*Math.sin(deltaLongitude/2)
+      let c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+      let d = R*c
+      return d
+    }
+    
+  </script>
+</body>
+</html>

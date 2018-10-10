@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>canvas beginPath closePath</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body{
+      text-align: center;
+    }
+    canvas{
+      border: 1px solid;
+      margin-top: 56px;
+    }
+  </style>
+</head>
+<body>
+  <!-- canvas默认宽高是300*150,如果在标签中直接指定宽高其实就是重置宽高,如果是样式里设置canvas的宽高其实就是将其默认的300*150的宽高进行了拉伸或缩放,内容会变形 -->
+  <canvas id="canvas" width="500" height="300"></canvas>
+
+  <script>
+    window.addEventListener('load', beginClosePath, true)
+    // beginPath和closePath区别
+    // 其实beginPath和closePath没有什么关系,也不是couple
+    // closePath就是将当前路径的终点连一条路径到起点,这里需要注意的点:如果你画了两条首尾相连的线
+    // 描边和填充,然后closePath你会发现描边并没有闭合,但是填充是闭合的
+    // canvas中的绘制方法(stroke,fill)都会以上一次beginPath之后的所有路径为基础绘制
+    // https://www.cnblogs.com/xuehaoyue/p/6549682.html
+    function beginClosePath(){
+      let canvas = document.getElementById('canvas')
+      let context = canvas.getContext('2d')
+      /* //closePath
+      context.strokeStyle ='red'
+      context.fillStyle ='blue'
+      context.lineWidth = 10
+      context.moveTo(0,0)
+      context.lineTo(100,200)
+      context.lineTo(200, 100)
+      context.stroke()
+      context.fill()
+      context.closePath() */
+
+      //beginPath
+      context.moveTo(100, 100)
+      context.lineTo(200, 100)
+      context.strokeStyle ='red'
+      context.stroke()//这里的stroke是用来话(100, 100)到(200,100)这条线的
+      
+      // context.beginPath() //添加和去掉这一行试试效果
+      context.strokeStyle ='black'
+      context.moveTo(100, 200)
+      context.lineTo(200, 200)
+      context.stroke()//如果没有beginPath这里的stroke其实是从头画,也就是这里的stroke也会将上面的路径再画一遍,所以第一条线会比较粗,因为画了两遍
+    }
+  </script>
+</body>
+</html>

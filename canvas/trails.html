@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>canvas Trails</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body{
+      text-align: center;
+    }
+    canvas{
+      border: 1px solid;
+      margin-top: 56px;
+    }
+  </style>
+</head>
+<body>
+  <!-- canvas默认宽高是300*150,如果在标签中直接指定宽高其实就是重置宽高,如果是样式里设置canvas的宽高其实就是将其默认的300*150的宽高进行了拉伸或缩放,内容会变形 -->
+  <canvas id="trails" width="400" height="500"></canvas>
+
+  <script>
+    window.addEventListener('load', drawScene, true)
+    let canvas
+    let context
+    function drawScene(){
+      canvas = document.getElementById('trails')
+      context = canvas.getContext('2d')
+      drawTrails()
+    }
+    function drawTrails(){
+      /* 绘制树和倒影 */
+      context.save()  //当前将树画在130,250位置上,后面的还是要0,0为原点
+      context.translate(130, 250)
+      context.rotate(0.1)
+      context.transform(1, 0, -0.5, 1, 0, 0)
+      context.scale(1, 0.6)
+      context.fillStyle = 'rgba(0, 0, 0, 0.2)'
+      context.fillRect(-5, -50, 10, 50)
+      createCanopyPath()
+      context.fill()
+      context.restore()
+      
+      context.save()
+      context.translate(130, 250)
+      drawTree()
+      context.restore()
+
+      /* 绘制第二棵树和倒影 */
+      context.save()  //当前将树画在130,250位置上,后面的还是要0,0为原点
+      context.translate(260, 500)
+      context.rotate(0.1)
+      context.transform(1, 0, -0.5, 1, 0, 0)
+      context.scale(2, 1.6)
+      context.fillStyle = 'rgba(0, 0, 0, 0.2)'
+      context.fillRect(-5, -50, 10, 50)
+      createCanopyPath()
+      context.fill()
+      context.restore()
+
+      context.save()
+      context.translate(260, 500)
+      context.scale(2, 2)
+      drawTree()
+      context.restore()
+
+      /* 绘制路 */
+      drawCurve()
+
+      /* 绘制文本标题 */
+      context.save()
+      context.font = '60px impact'
+      context.fillStyle = '#960'
+      context.textAlign = 'center'
+      context.shadowColor = 'rgba(0,0,0,0.2)'
+      context.shadowOffsetX = 15
+      context.shadowOffsetY = -10
+      context.shadowBlur = 2
+      context.fillText('Happy Trails!', 200, 60, 400)
+      context.restore()
+    }
+    //绘制树
+    function drawTree(){
+      /* 绘制树冠并填充描边上色 */
+      createCanopyPath()
+      context.lineWidth = 4
+      context.lineJoin = 'round'
+      context.strokeStyle = '#630'
+      context.fillStyle = '#390'
+      context.fill() //先填充还是后填充也会绘制的图的样式
+      context.stroke()
+
+      /* 普通颜色填充树干 */
+      context.beginPath()
+      // context.fillStyle = '#630'
+      // context.fillRect(-5, -50, 10, 50)
+      /* 渐变填充树干 */
+      let trunkGradient = context.createLinearGradient(-5, -50, 5, -50)
+      trunkGradient.addColorStop(0, '#630')
+      trunkGradient.addColorStop(0.4, '#960')
+      trunkGradient.addColorStop(1, '#520')
+      context.fillStyle = trunkGradient
+      context.fillRect(-5, -50, 10, 50)
+
+      /* 垂直投影用作树冠在树干上的投影 */
+      context.beginPath()
+      let canopyShadow = context.createLinearGradient(0, -50, 0, 0)
+      canopyShadow.addColorStop(0, 'rgba(0,0,0,0.5)')
+      canopyShadow.addColorStop(0.2, 'rgba(0,0,0,0)')
+      context.fillStyle = canopyShadow
+      context.fillRect(-5, -50, 10, 50)
+    }
+    //绘制树冠轮廓
+    function createCanopyPath(){
+      context.beginPath()
+      context.moveTo(-25, -50)
+      context.lineTo(-10, -80)
+      context.lineTo(-20, -80)
+      context.lineTo(-5, -110)
+      context.lineTo(-15, -110)
+      context.lineTo(0, -140)
+      context.lineTo(15, -110)
+      context.lineTo(5, -110)
+      context.lineTo(20, -80)
+      context.lineTo(10, -80)
+      context.lineTo(25, -50)
+      context.closePath() //闭合树冠的起点和终点
+    }
+    //绘制曲线
+    function drawCurve(){
+      context.save()
+      context.translate(-10, 350)
+      context.beginPath()
+      context.moveTo(0,0)
+      context.quadraticCurveTo(170, -50, 260, -190)
+      context.quadraticCurveTo(310, -250, 410, -250)
+      context.strokeStyle = '#630'
+      context.lineWidth = 20
+      context.stroke()
+      context.restore()
+    }
+  </script>
+</body>
+</html>

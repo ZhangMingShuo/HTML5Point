@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>geolocation</title>
+</head>
+<body>
+  
+  <script>
+    navigator.geolocation.getCurrentPosition(uploadLocation, handleLocationError)
+    
+    //返回浏览器位置信息
+    function uploadLocation(position) {
+      let latitude = position.coords.latitude
+      let longitude = position.coords.longitude
+      let accuracy = position.coords.accuracy
+    }
+    
+    //获取位置信息出错处理
+    function handleLocationError(error) {
+      switch(error.code){
+        case 0: 
+          updateStatus(`不包括在其他错误号中的错误${error.message}`)
+          break
+        case 1: 
+          updateStatus(`用户选择拒绝浏览器获取其位置信息${error.message}`)
+          break
+        case 2: 
+          updateStatus(`尝试获取用户位置数据但失败了${error.message}`)
+          break
+        case 3: 
+          updateStatus(`请求位置信息超时`)
+          break
+      }
+    }
+
+    function updateStatus(str) {
+      alert(str)
+    }
+  </script>
+</body>
+</html>

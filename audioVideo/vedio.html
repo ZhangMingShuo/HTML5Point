@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>vedio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    video{
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 18年后video自动播放必须加上属性muted(因为它害怕自动播放吓死你,所以必须静音才能自动播放) -->
+  <!-- 鼠标移动来预览视频播放也是必须加上muted属性才能生效哦 -->
+  <canvas id="timeline"></canvas>
+  <video id="movies" width="400px" height="300px" controls onplaying="startVideo()" onmouseover="this.play()" onmouseout="this.pause()" onpause="pauseVideo()" onended="stopTimeline()" autobuffer="true">
+    <source src="../imgs/告白气球.mp4">
+  </video>
+    
+  <script>
+    //抓帧时间间隔
+    let updateInterval = 2000
+
+    //帧大小
+    let video = document.getElementById('movies')
+    let frameWidth = video.width
+    let frameHeight = video.height
+
+    //总帧数 3*4网格布局
+    let frameRows = 3
+    let frameColumns = 4
+    let frameGrid = frameRows * frameColumns
+
+    //设置canvas大小
+    let timeline = document.getElementById('timeline')
+    timeline.width = frameWidth * frameRows
+    timeline.height = frameHeight * frameColumns
+
+    //当前帧
+    let frameCount = 0
+
+    //播放完后取消计时器
+    let intervalid
+    let videoStarted = false
+    
+    //将抓取的帧绘制到canvas上
+    function updateFrame(){
+      let context = timeline.getContext('2d')
+      // %求余数
+      // frameCount: 0,1,2,3,4,....
+      // framePosition: 0,1,2,3,4,...12,0,1,2,3,4,...12,...
+      // frameX: 0*400, 1*400, 2*400, 0*400,...
+      // frameY: 0, 0, 0, 300, 300, 300, 600, ...
+      let framePosition = frameCount % frameGrid
+      let frameX = (framePosition % frameRows) * frameWidth
+      let frameY = (Math.floor(framePosition / frameRows)) * frameHeight
+      context.drawImage(video, frameX, frameY, frameWidth, frameHeight)
+      frameCount++
+    }
+    // 开始播放后开始抓图
+    function startVideo(){
+      if(videoStarted){
+        return 
+      }
+      videoStarted = true
+      updateFrame()
+      intervalid = setInterval(updateFrame, updateInterval)
+    }
+    // 单击canvas上某一帧时定位到视频
+    // html事件直接在HTML元素上onclick
+    // DOM0级事件ele.onclick = func
+    // DOM2级事件ele.addEventListener('click', func)
+    timeline.onclick = function(e){
+      let offX = e.offsetX - timeline.offsetLeft
+      let offY = e.offsetY - timeline.offsetTop
+
+      //计算以零为基准索引的网格中哪帧被单击
+      // 首先计算横坐标索引
+      let clickedFrame = Math.floor(offY / frameHeight) * frameRows
+      //再加上纵坐标索引,就是在网格中的索引
+      clickedFrame += Math.floor(offX / frameWidth)
+
+      //视频开始后已经播放到多少帧
+      //网格满了后新的图片会从头开始绘制
+      let seekedFrame = (Math.floor(frameCount / frameGrid)) * frameGrid + clickedFrame
+
+      //如果单击的帧在当前帧之前,需要向前跳跃一个完整的网格周期
+      if(clickedFrame > (frameCount % frameGrid)){
+        seekedFrame -= frameGrid
+      }
+
+      //以防万一,不允许跳过当前视频
+      if(seekedFrame < 0){
+        return 
+      }
+
+      //计算当前帧对应视频
+      //video中currentTime以秒为单位
+      video.currentTime = seekedFrame * updateInterval / 1000
+      frameCount = seekedFrame
+    }
+    // 暂定播放
+    function pauseVideo(){
+      clearInterval(intervalid)
+    }
+    // 播放结束
+    function stopTimeline(){
+      clearInterval(intervalid)
+    }
+  </script>
+</body>
+</html>

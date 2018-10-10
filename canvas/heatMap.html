@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>canvas heatMap</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body{
+      text-align: center;
+    }
+    #heatMap{
+      border: 1px solid;
+      margin-top: 56px;
+      background: url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1537600463&di=e982aba201c96e0bf5b26f654e5e4097&imgtype=jpg&er=1&src=http%3A%2F%2Fattachments.gfan.com%2Fforum%2F201605%2F31%2F234941i5wc5mii0juw3iat.jpg') no-repeat;
+      background-size: 100% 100%;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="heatMap" width="300" height="300"></canvas>
+  <button id="resetButton">Reset</button>
+  <script>
+    window.addEventListener('load', loadDemo, true)
+    let canvas
+    let context
+    let points = {}
+    let x = -1
+    let y = -1
+    function loadDemo(){
+      canvas = document.getElementById('heatMap')
+      context = canvas.getContext('2d')
+      context.globalAlpha = 0.2
+      context.globalCompositeOperation = 'lighter'
+      //鼠标当前位置设置热力点
+      canvas.onmousemove = function(e){
+        x = e.clientX - e.target.offsetLeft
+        y = e.clientY - e.target.offsetTop
+        addToPoint(x, y)
+      }
+      sample()
+    }
+    function sample(){
+      if(x != -1){
+        addToPoint(x, y)
+      }
+      setTimeout(sample, 100);
+    }
+    //绘制热力点,当前位置停留越长点颜色越深
+    function addToPoint(x,y){
+      //points[[x,y]]将数组作为key
+      if(!points[[x,y]]){
+        points[[x, y]] = 1
+      }else if(points[[x,y]]==10){
+        return
+      }else {
+        points[[x,y]]++
+      }
+      drawPoint(x,y,points[[x,y]])
+    }
+    //清空canvas
+    function reset(){
+      points = {}
+      context.clearRect(0, 0, 300, 300)
+      x = -1
+      y = -1
+    }
+    function getColor(instensity){
+      let colors = ['#072933', '#2E4045', '#8C593B', '#B2814E', '#FAC268', '#FAD237']
+      return colors[Math.floor(instensity/2)]
+    }
+    function drawPoint(x,y,radius){
+      context.fillStyle = getColor(radius)
+      radius = Math.sqrt(radius) * 10
+      context.beginPath()
+      context.arc(x,y,radius,0,Math.PI*2,true)
+      context.closePath()
+      context.fill()
+    }
+  </script>
+</body>
+</html>

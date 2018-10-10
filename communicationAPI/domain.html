@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>domain</title>
+</head>
+<body>
+    <h1>This is the main domain</h1>
+    <div style="margin:0 20px;">
+        <textarea name="main" cols="80" rows="5"></textarea><br/>
+        <input type="button" value="send to iframe A"/>
+        <input type="button" value="send to iframe B"/>
+    </div>
+    <div style="float:left; margin:0 20px;">
+        <h3>iframe A</h3>
+        <iframe src="http://a.com:8090/subAdomain.html" frameborder="1" style="width:300px; height:300px;"></iframe>
+    </div>
+    <div style="float:left;">
+        <h3>iframe B</h3>
+        <iframe src="http://b.com:8090/subBdomain.html" frameborder="1" style="width:300px; height:300px;"></iframe>
+    </div>
+    <div style="float:left;">
+        <h5 id="received"></h5>
+    </div>
+
+  <script>
+    let received = document.querySelector('#received')
+    let sendToIframeA = document.querySelectorAll('input')[0]
+    let sendToIframeB = document.querySelectorAll('input')[1]
+    let iframeA = document.querySelectorAll('iframe')[0]
+    let iframeB = document.querySelectorAll('iframe')[1]
+
+    //接收数据
+    function getMessage(e) {
+      console.log('main received!')
+      received.innerHTML = `Receive message from ${e.origin}, the data is ${e.data}`
+      e.source.postMessage(`Receive the message`, e.origin)
+    }
+    
+    //发送数据
+    sendToIframeA.addEventListener('click', function(){
+      let content = document.querySelector('textarea').value
+      //contentWindow方法获取iframe的window,并传值
+      iframeA.contentWindow.postMessage(content, 'http://a.com:8090')
+    }, false)
+    sendToIframeB.addEventListener('click', function(){
+      let content = document.querySelector('textarea').value
+      //contentWindow方法获取iframe的window对象,并传值
+      //postMessage第二个参数指明目标窗口的源,将content传递到指定窗口
+      iframeA.contentWindow.postMessage(content, 'http://b.com:8090')
+    }, false)
+  </script>
+</body>
+</html>
