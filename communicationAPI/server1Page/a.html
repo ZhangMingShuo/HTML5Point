@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=`, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <h5>来自http://127.0.0.1:81的页面AAAAAAAAAAA</h5>
+  <div style="width:200px; float:left; margin-right:200px;border:solid 1px #333;">
+    <div id="color">Frame Color</div>
+  </div>
+  <div>
+    <iframe src="http://127.0.0.2:8181/b.html" id="child"></iframe>
+  </div>
+
+  <script>
+    window.onload = function(){
+      window.frames[0].postMessage('getcolor', 'http://127.0.0.2:8181')
+    }
+
+    window.addEventListener('message', (e)=>{
+      let color = e.data
+      document.getElementById('color').style.backgroundColor = color
+    }, false)
+  </script>
+</body>
+</html>
