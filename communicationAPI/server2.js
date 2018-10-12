@@ -6,7 +6,7 @@ let fs = require('fs')
 
 http.createServer((req, res)=>{
   let pathname = url.parse(req.url).pathname
-  let realPath = path.join('E:/myGithub/html5/communicationAPI/server2Page', pathname)
+  let realPath = path.join(__dirname + '/server2Page', pathname)
   fs.readFile(realPath, (err, data)=>{
     if(err){
       res.writeHead(404, {'Content-Type': 'text/plain'})
