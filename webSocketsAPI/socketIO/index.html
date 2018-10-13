@@ -4,9 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>socket.io</title>
+  <title>SocketIO Chat</title>
+  <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 13px Helvetica, Arial; }
+  form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+  form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+  form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; cursor: pointer; }
+  #messages { list-style-type: none; margin: 0; padding: 0; }
+  #messages li { padding: 5px 10px; }
+  #messages li:nth-child(odd) { background: #eee; }
+  </style>
 </head>
+
 <body>
-  
+  <ul id="messages"></ul>
+  <form action="">
+    <input id="m" autocomplete="off" type="text" /><button>Send</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+    /* Socket.IO 由两部分组成：
+    一个服务端用于集成 (或挂载) 到 Node.JS HTTP 服务器： socket.io
+    一个加载到浏览器中的客户端： socket.io-client */
+    //上面的script标签引入 就加载了 socket.io-client
+    //index.js文件中require('socket.io')(http)这句相当于给这个http服务增加了一条处理/socket.io/socket.io.js的路由
+    // https://blog.csdn.net/wang839305939/article/details/79316152
+    $(function () {
+      let socket = io()
+      $('form').submit(()=>{
+        socket.emit('chat message', $('#m').val())
+        $('#m').val('')
+        return false
+      })
+      socket.on('chat message', (msg)=>{
+        $('#messages').append($('<li>').text(msg))
+      })
+    })
+  </script>
 </body>
 </html>
