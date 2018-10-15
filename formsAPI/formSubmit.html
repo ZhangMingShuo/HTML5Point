@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>forms input</title>
+  <style>
+  *{margin: 0;padding: 0;}
+  h3{text-align: center;margin-top: 58px;}
+  </style>
+</head>
+<body>
+  <h3>表单应用1</h3>
+  <form name="register">
+    <p>
+      <label for="runnername">Runner: </label>
+      <input type="text" id="runnername" name="runnername" placeholder="First and last name" required>
+    </p>
+    <p>
+      <label for="phone">Tel #: </label>
+      <input type="tel" id="phone" name="phone" placeholder="(xxx) xxx-xxx">
+    </p>
+    <p>
+      <label for="emailaddress">E-mail: </label>
+      <input type="email" id="emailaddress" name="emailaddress" placeholder="For confirmation only">
+    </p>
+    <p>
+      <label for="dob">DOB: </label>
+      <input type="date" id="dob" name="dob" placeholder="MM/DD/YYYY">
+    </p>
+    <fieldset>
+      <legend>T-shirt Size: </legend>
+      <p>
+        <input type="radio" id="small" name="tshirt" value="small">
+        <label for="small">Small</label>
+      </p>
+      <p>
+        <input type="radio" id="medium" name="tshirt" value="medium">
+        <label for="medium">Medium</label>
+      </p>
+      <p>
+        <input type="radio" id="large" name="tshirt" value="large">
+        <label for="large">Large</label>
+      </p>
+      <p>
+        <label for="style">Shirt Style: </label>
+        <input type="text" id="style" name="style" list="stylelist" title="Years of participation">
+      </p>
+      <datalist id="stylelist">
+        <option value="White" label="1st Year"></option>
+        <option value="Gray" label="2nd - 4th Year"></option>
+        <option value="Navy" label="Veteran (5+ Years)"></option>
+      </datalist>
+    </fieldset>
+    <fieldset>
+      <legend>Expectations: </legend>
+      <p>
+        <label for="confidence">Confidence: </label>
+        <input type="range" id="confidence" name="level" onchange="setConfidence(this.value)" min="0" max="100" step="5" value="0">
+        <span id="confidenceDisplay">0%</span>
+      </p>
+      <p>
+        <label for="notes">Notes: </label>
+        <textarea name="notes" id="notes" maxlength="140"></textarea>
+      </p>
+    </fieldset>
+    <p>
+      <input type="submit" name="register" value="Register">
+    </p>
+  </form>
+  <h3>表单应用2</h3>
+  <form name="passwordChange">
+    <p>
+      <label for="password1">New Password: </label>
+      <input type="password" id="password1" onchange="checkPasswords()">
+    </p>
+    <p>
+      <label for="password2">Confirm Password: </label>
+      <input type="password" id="password2" onchange="checkPasswords()">
+    </p>
+  </form>
+
+  <script>
+    window.addEventListener('load', loadDemo, false)
+    function loadDemo(){
+      document.register.addEventListener('invalid', invalidHandle, true)
+    }
+    function invalidHandle(evt) {
+      let label = evt.srcElement.parentElement.getElementsByTagName('label')[0]
+      //校验不过的label文字标红色
+      label.style.color = 'red'
+      //浏览器会对表单校验有个默认校验,这里取消浏览器的默认行为
+      evt.preventDefault();
+    }
+    //range滑动显示自信值
+    function setConfidence(newVal){
+      document.getElementById('confidenceDisplay').innerHTML = `${newVal}%`
+    }
+    //校验密码
+    function checkPasswords() {
+      let pass1 = document.getElementById('password1')
+      let pass2 = document.getElementById('password2')
+
+      if(pass1.value != pass2.value){
+        pass2.setCustomValidity('Your passwords do not match. Please recheck that your new password is entered identically in the two fields.')
+      }else {
+        pass2.setCustomValidity('')
+      }
+    }
+  </script>
+</body>
+</html>
