@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>复杂的worker实例演示</title>
+</head>
+<body>
+  <!-- 项目描述: canvas 向多个 web worker发送图像数据,web worker 对这些图像进行 blur 处理.一般处理时间会根据图片大小时间不同 -->
+  <h3 id="status">your browser does not support web workers.</h3>
+
+  <button id="startBlurButton">Blur</button>
+  <button id="stopButton" disabled>Stop Workers</button>
+  <button onclick="document.location = document.location">Reload</button>
+  <button id="test" style="color: red">I still can work</button>
+
+  <label for="workerCount">Number of Workers</label>
+  <select id="workerCount">
+    <option>1</option>
+    <option selected>2</option>
+    <option>4</option>
+    <option>8</option>
+    <option>16</option>
+  </select>
+
+  <div id="imageContainer"></div>
+  <div id="logOutput"></div>
+
+  <script>
+    /* 通过传递的 url 来实例化每个 workers 对象,每个实例化的worker运行的代码相同,分别负责处理输入图像的不同部分 */
+    let imageURL = './eg.jpg'
+    let image
+    let ctx
+    let workers = []
+
+    window.addEventListener('load', loadDemo, true)
+
+    function loadDemo() {
+      log(`Loading image data`)
+      
+      if(typeof(Worker) !== 'undefined'){
+        document.getElementById('status').innerHTML = 'your browser supports web workers.'
+        document.getElementById('stopButton').onclick = stopBlur
+        document.getElementById('startBlurButton').onclick = startBlur
+        loadImageData(imageURL)
+        document.getElementById('startBlurButton').disabled = true
+        document.getElementById('stopButton').disabled = true
+      }
+    }
+    
+    //加载图片
+    function loadImageData(url) {
+      let canvas = document.createElement('canvas')
+      ctx = canvas.getContext('2d')
+      image = new Image()
+      image.src = url
+
+      document.getElementById('imageContainer').appendChild(canvas)
+      
+      image.onload = () => {
+        canvas.width = image.width
+        canvas.height = image.height
+        ctx.drawImage(image, 0, 0)
+        window.imgdata = ctx.getImageData(0, 0, image.width, image.height)
+        setRunningState(false)
+        log(`Image loaded: ${image.width} * ${image.height} pixels`)
+      }
+    }
+    
+    //点击停止worker
+    function stopBlur() {
+      for(let i = 0; i < workers.length; i++){
+        workers[i].terminate()
+      }
+      setRunningState(false)
+    }
+    
+    //点击开始模糊图片
+    function startBlur() {
+      let workerCount = parseInt(document.getElementById('workerCount').value)
+      let width = image.width / workerCount
+      
+      //根据选择的数字创建相应个数的workers
+      for(let i = 0; i < workerCount; i++){
+        let worker = initWorker('./blurWorker.js')
+        worker.index = i
+        worker.width = width
+        workers[i] = worker
+        sendBlurTask(worker, i, width)
+      }
+      setRunningState(true)
+    }
+
+    //实例化worker
+    function initWorker(src) {
+      let worker = new Worker(src)
+      worker.addEventListener('message', messageHandler, true)
+      worker.addEventListener('error', errorHandler, true)
+      return worker
+    }
+
+    /* 给 worker 发送代表模糊任务的数据和参数来使用worker */
+    function sendBlurTask(worker, i, chunkWidth) {
+      let chunkHeight = image.height
+      let chunkStartX = i * chunkWidth
+      let chunkStartY = 0
+      let data = ctx.getImageData(chunkStartX, chunkStartY, chunkWidth, chunkHeight).data
+      worker.postMessage({
+        'type': 'blur',
+        'imageData': data,
+        'width': chunkWidth,
+        'height': chunkHeight,
+        'startX': chunkStartX
+      })
+    }
+
+    //监听post传过来的数据
+    function messageHandler(e) {
+      let messageType = e.data.type
+      switch (messageType) {
+        case ('status'):
+          log(`${e.data.statusText}`)
+          break;
+        case ('progress'):
+          let imageData = ctx.createImageData(e.data.width, e.data.height)
+
+          for(let i = 0; i < imageData.data.length; i++){
+            let val = e.data.imageData[i]
+            if(val === null || val > 255 || val < 0){
+              log(`illegal value: ${val} at i`)
+              return 
+            }
+            imageData.data[i] = val
+          }
+          ctx.putImageData(imageData, e.data.startX, 0)
+          sendBlurTask(e.target, e.target.index, e.target.width)
+          break;
+        default:
+          break;
+      }
+    }
+
+    //监听错误
+    function errorHandler(e) {
+      log(e.message)
+    }
+
+    //设置按钮可用不可用
+    function setRunningState(p) {
+      //运行状态 stop 可用 start 不可用
+      document.getElementById('startBlurButton').disabled = p
+      document.getElementById('stopButton').disabled = !p
+    }
+
+    //打印提示
+    function log(s) {
+      let logOutput = document.getElementById('logOutput')
+      logOutput.innerHTML = `${s} <br> ${logOutput.innerHTML}`
+    }
+
+    //测试页面仍然可以交互
+    document.getElementById('test').onclick = ()=>{
+      console.log(document.getElementById('test').style.color)
+      if(document.getElementById('test').style.color === 'red'){
+        document.getElementById('test').style.color = 'blue'
+      }else {
+        document.getElementById('test').style.color = 'red'
+      }
+    }
+  </script>
+</body>
+</html>

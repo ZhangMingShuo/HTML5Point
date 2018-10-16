@@ -17,10 +17,10 @@
 </head>
 <body>
   <!-- 18年后video自动播放必须加上属性muted(因为它害怕自动播放吓死你,所以必须静音才能自动播放) -->
-  <!-- 鼠标移动来预览视频播放也是必须加上muted属性才能生效哦 -->
+  <!-- 鼠标移动来预览视频播放也是必须加上muted属性才能生效哦onmouseover="this.play()" onmouseout="this.pause()" -->
   <canvas id="timeline"></canvas>
-  <video id="movies" width="400px" height="300px" controls onplaying="startVideo()" onmouseover="this.play()" onmouseout="this.pause()" onpause="pauseVideo()" onended="stopTimeline()" autobuffer="true">
-    <source src="../imgs/告白气球.mp4">
+  <video id="movies" width="400px" height="300px" controls onplaying="startVideo()" onpause="pauseVideo()" onended="stopTimeline()" autobuffer="true">
+    <source src="./告白气球.mp4">
   </video>
     
   <script>

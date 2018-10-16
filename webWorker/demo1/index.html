@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>worker小实例演示</title>
+</head>
+<body>
+  <h2 id="support"></h2>
+  <button id="helloButton">Post a Message</button>
+  <button id="stopButton">Stop Task</button>
+
+  <script>
+    window.addEventListener('load', loadDemo, false)
+    function loadDemo() {
+      if(typeof(Worker)!=='undefined'){
+        document.getElementById('support').innerHTML = 'your browser supports web workers!'
+        //创建worker
+        worker = new Worker('./echoWorker.js')
+        //监听worker发送过来的数据
+        worker.addEventListener('message', messageHandler, true)
+        //worker错误监听
+        worker.addEventListener('error', errorHandler, true)
+        //点击按钮发送数据
+        document.getElementById('helloButton').onclick = function(){
+          worker.postMessage('我是通过按钮点击发送给worker的数据')
+        }
+        //点击终止worker
+        document.getElementById('stopButton').onclick = stopWorker
+      }
+    }
+    function messageHandler(e) {
+      console.log(e.data)
+    }
+    function errorHandler(e) {
+      console.warn(e.message, e)
+    }
+    function stopWorker() {
+      worker.terminate()
+    }
+  </script>
+</body>
+</html>
